@@ -1,0 +1,75 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum TicketStatus {
+  new
+  pending_review
+  approved
+  sent
+  archived
+}
+
+model User {
+  id                String            @id @default(cuid())
+  email             String            @unique
+  hashedPassword    String
+  name              String            @default("")
+  twoFactorEnabled  Boolean           @default(false)
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @default(now()) @updatedAt
+  twoFactorTokens   TwoFactorToken[]
+}
+
+model TwoFactorToken {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  hashedCode String
+  expiresAt  DateTime
+  used       Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model Ticket {
+  id               String       @id @default(cuid())
+  firstName        String
+  lastName         String
+  email            String
+  location         String       @default("")
+  subject          String
+  message          String
+  aiDraftSubject   String       @default("")
+  aiDraftResponse  String       @default("")
+  finalSubject     String       @default("")
+  finalResponse    String       @default("")
+  status           TicketStatus @default(new)
+  n8nExecutionId   String       @default("")
+  respondedAt      DateTime?
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+  notes            Note[]
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+model Note {
+  id         String   @id @default(cuid())
+  content    String
+  authorId   String
+  authorName String
+  ticketId   String
+  ticket     Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@index([ticketId])
+}
