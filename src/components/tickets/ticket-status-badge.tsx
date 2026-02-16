@@ -4,23 +4,23 @@ import type { TicketStatus } from "@/lib/types";
 const statusConfig: Record<TicketStatus, { label: string; className: string }> = {
   new: {
     label: "New",
-    className: "bg-blue-500/10 text-blue-500 hover:bg-blue-500/20",
+    className: "bg-cyan-500/15 text-cyan-400 hover:bg-cyan-500/25",
   },
   pending_review: {
     label: "Pending Review",
-    className: "bg-amber-500/10 text-amber-500 hover:bg-amber-500/20",
+    className: "bg-yellow-500/15 text-yellow-400 hover:bg-yellow-500/25",
   },
   approved: {
     label: "Approved",
-    className: "bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20",
+    className: "bg-green-500/15 text-green-400 hover:bg-green-500/25",
   },
   sent: {
     label: "Sent",
-    className: "bg-purple-500/10 text-purple-500 hover:bg-purple-500/20",
+    className: "bg-purple-500/15 text-purple-400 hover:bg-purple-500/25",
   },
   archived: {
     label: "Archived",
-    className: "bg-zinc-500/10 text-zinc-500 hover:bg-zinc-500/20",
+    className: "bg-zinc-500/15 text-zinc-400 hover:bg-zinc-500/25",
   },
 };
 

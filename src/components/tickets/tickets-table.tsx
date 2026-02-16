@@ -22,7 +22,8 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { TicketStatusBadge } from "./ticket-status-badge";
-import type { TicketListItem, TicketStatus } from "@/lib/types";
+import { CATEGORY_CONFIG } from "@/lib/category-config";
+import type { TicketListItem, TicketStatus, TicketCategory } from "@/lib/types";
 import { ChevronLeft, ChevronRight, Archive, X, Download } from "lucide-react";
 
 interface TicketsTableProps {
@@ -34,6 +35,7 @@ interface TicketsTableProps {
     totalPages: number;
   };
   currentStatus?: string;
+  category?: TicketCategory;
 }
 
 const STATUS_TABS: { value: string; label: string }[] = [
@@ -49,11 +51,16 @@ export function TicketsTable({
   tickets,
   pagination,
   currentStatus,
+  category,
 }: TicketsTableProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [bulkLoading, setBulkLoading] = useState(false);
+
+  const config = category ? CATEGORY_CONFIG[category] : null;
+  const basePath = config ? `/${config.slug}` : "/tickets";
+  const listColumn = config?.listColumn ?? { key: "subject", label: "Subject" };
 
   function navigate(status?: string, page?: number) {
     const params = new URLSearchParams();
@@ -62,7 +69,7 @@ export function TicketsTable({
     if (page && page > 1) params.set("page", String(page));
     const currentSearch = searchParams.get("search");
     if (currentSearch) params.set("search", currentSearch);
-    router.push(`/tickets${params.toString() ? `?${params}` : ""}`);
+    router.push(`${basePath}${params.toString() ? `?${params}` : ""}`);
   }
 
   function toggleSelect(id: string) {
@@ -109,6 +116,7 @@ export function TicketsTable({
   async function handleExportCSV() {
     const params = new URLSearchParams();
     if (currentStatus && currentStatus !== "all") params.set("status", currentStatus);
+    if (category) params.set("category", category);
     const currentSearch = searchParams.get("search");
     if (currentSearch) params.set("search", currentSearch);
 
@@ -122,7 +130,8 @@ export function TicketsTable({
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `tickets-${new Date().toISOString().slice(0, 10)}.csv`;
+      const slug = config?.slug ?? "tickets";
+      a.download = `${slug}-${new Date().toISOString().slice(0, 10)}.csv`;
       a.click();
       URL.revokeObjectURL(url);
       toast.success("CSV exported");
@@ -131,12 +140,17 @@ export function TicketsTable({
     }
   }
 
+  function getCellValue(ticket: TicketListItem): string {
+    const key = listColumn.key as keyof TicketListItem;
+    return (ticket[key] as string) || "";
+  }
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Support Tickets</CardTitle>
+        <CardTitle>{config?.tableTitle ?? "Support Tickets"}</CardTitle>
         <CardDescription>
-          Review and respond to customer inquiries
+          {config?.tableDescription ?? "Review and respond to customer inquiries"}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -198,7 +212,7 @@ export function TicketsTable({
                 />
               </TableHead>
               <TableHead>Name</TableHead>
-              <TableHead>Subject</TableHead>
+              <TableHead>{listColumn.label}</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Date</TableHead>
               <TableHead></TableHead>
@@ -219,7 +233,7 @@ export function TicketsTable({
                 <TableRow
                   key={ticket.id}
                   className="cursor-pointer"
-                  onClick={() => router.push(`/tickets/${ticket.id}`)}
+                  onClick={() => router.push(`${basePath}/${ticket.id}`)}
                 >
                   <TableCell onClick={(e) => e.stopPropagation()}>
                     <Checkbox
@@ -230,7 +244,7 @@ export function TicketsTable({
                   <TableCell className="font-medium">
                     {ticket.firstName} {ticket.lastName}
                   </TableCell>
-                  <TableCell>{ticket.subject}</TableCell>
+                  <TableCell>{getCellValue(ticket)}</TableCell>
                   <TableCell>
                     <TicketStatusBadge
                       status={ticket.status as TicketStatus}

@@ -8,11 +8,11 @@ interface StatusBreakdownChartProps {
 }
 
 const STATUS_COLORS: Record<string, string> = {
-  new: "#3b82f6",
-  pending_review: "#f59e0b",
+  new: "#06b6d4",
+  pending_review: "#eab308",
   approved: "#22c55e",
   sent: "#a855f7",
-  archived: "#6b7280",
+  archived: "#52525b",
 };
 
 const STATUS_LABELS: Record<string, string> = {
@@ -61,13 +61,15 @@ export function StatusBreakdownChart({ data }: StatusBreakdownChartProps) {
                 </Pie>
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: "hsl(var(--card))",
-                    border: "1px solid hsl(var(--border))",
+                    backgroundColor: "#18181b",
+                    border: "1px solid #3f3f46",
                     borderRadius: "8px",
-                    color: "hsl(var(--foreground))",
+                    color: "#fafafa",
                   }}
+                  itemStyle={{ color: "#fafafa" }}
+                  labelStyle={{ color: "#fafafa" }}
                 />
-                <Legend />
+                <Legend wrapperStyle={{ color: "#fafafa" }} />
               </PieChart>
             </ResponsiveContainer>
           )}

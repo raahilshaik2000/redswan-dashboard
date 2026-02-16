@@ -76,7 +76,7 @@ export default function VerifyPage() {
       }
 
       await update({ twoFactorVerified: true });
-      router.push("/tickets");
+      router.push("/contact-us");
     } catch {
       setError("Something went wrong");
       setLoading(false);

@@ -5,14 +5,36 @@ export type TicketStatus =
   | "sent"
   | "archived";
 
+export type TicketCategory =
+  | "contact_us"
+  | "property_tokenization"
+  | "job_application";
+
+export interface Attachment {
+  id: string;
+  fileName: string;
+  fileType: string;
+  fileUrl: string;
+  fileSize: number | null;
+  ticketId: string;
+  createdAt: string;
+}
+
 export interface Ticket {
   id: string;
+  category: TicketCategory;
   firstName: string;
   lastName: string;
   email: string;
   location: string;
   subject: string;
   message: string;
+  phoneNumber: string | null;
+  propertyName: string | null;
+  propertyAddress: string | null;
+  country: string | null;
+  linkedinUrl: string | null;
+  position: string | null;
   aiDraftSubject: string;
   aiDraftResponse: string;
   finalSubject: string;
@@ -22,16 +44,20 @@ export interface Ticket {
   respondedAt: string | null;
   createdAt: string;
   updatedAt: string;
+  attachments?: Attachment[];
 }
 
 export interface TicketListItem {
   id: string;
+  category: TicketCategory;
   firstName: string;
   lastName: string;
   email: string;
   subject: string;
   status: TicketStatus;
   createdAt: string;
+  propertyName?: string | null;
+  position?: string | null;
 }
 
 export interface TicketStats {
@@ -44,15 +70,28 @@ export interface TicketStats {
 }
 
 export interface InboundTicketPayload {
+  category?: TicketCategory;
   firstName: string;
   lastName: string;
   email: string;
   location?: string;
-  subject: string;
-  message: string;
+  subject?: string;
+  message?: string;
+  phoneNumber?: string;
+  propertyName?: string;
+  propertyAddress?: string;
+  country?: string;
+  linkedinUrl?: string;
+  position?: string;
   aiDraftSubject?: string;
   aiDraftResponse?: string;
   n8nExecutionId?: string;
+  attachments?: {
+    fileName: string;
+    fileType: string;
+    fileUrl: string;
+    fileSize?: number;
+  }[];
 }
 
 export interface UpdateTicketPayload {

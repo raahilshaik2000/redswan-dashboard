@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "RedSwan Dashboard",
-  description: "RedSwan analytics and metrics dashboard",
+  title: "RedSwan Digital Real Estate",
+  description: "RedSwan Digital Real Estate analytics and metrics dashboard",
 };
 
 export default function RootLayout({

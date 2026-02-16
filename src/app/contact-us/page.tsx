@@ -3,11 +3,16 @@ import { Header } from "@/components/dashboard/header";
 import { TicketsLiveWrapper } from "@/components/tickets/tickets-live-wrapper";
 import { prisma } from "@/lib/prisma";
 import { TicketStatus as PrismaTicketStatus } from "@/generated/prisma/enums";
+import { CATEGORY_CONFIG } from "@/lib/category-config";
 import type { TicketStats, TicketListItem } from "@/lib/types";
+
+const CATEGORY = "contact_us" as const;
+const config = CATEGORY_CONFIG[CATEGORY];
 
 async function getStats(): Promise<TicketStats> {
   const counts = await prisma.ticket.groupBy({
     by: ["status"],
+    where: { category: CATEGORY },
     _count: true,
   });
 
@@ -28,8 +33,8 @@ async function getStats(): Promise<TicketStats> {
   return stats;
 }
 
-async function getTickets(status?: string, search?: string, page = 1, limit = 20) {
-  const where: Record<string, unknown> = {};
+async function getTickets(status?: string, search?: string, page = 1, limit = 25) {
+  const where: Record<string, unknown> = { category: CATEGORY };
   if (status) where.status = status as PrismaTicketStatus;
   if (search) {
     where.OR = [
@@ -73,7 +78,7 @@ async function getTickets(status?: string, search?: string, page = 1, limit = 20
   };
 }
 
-export default async function TicketsPage({
+export default async function ContactUsPage({
   searchParams,
 }: {
   searchParams: Promise<{ status?: string; page?: string; search?: string }>;
@@ -95,10 +100,8 @@ export default async function TicketsPage({
       </Suspense>
       <main className="mx-auto max-w-7xl px-6 py-6">
         <div className="mb-6">
-          <h2 className="text-2xl font-bold tracking-tight">Tickets</h2>
-          <p className="text-sm text-muted-foreground">
-            Manage customer inquiries and AI-drafted responses
-          </p>
+          <h2 className="text-2xl font-bold tracking-tight">{config.label}</h2>
+          <p className="text-sm text-muted-foreground">{config.subtitle}</p>
         </div>
 
         <Suspense fallback={<div>Loading tickets...</div>}>
@@ -108,6 +111,7 @@ export default async function TicketsPage({
             initialPagination={ticketData.pagination}
             currentStatus={status}
             currentSearch={search}
+            category={CATEGORY}
           />
         </Suspense>
       </main>

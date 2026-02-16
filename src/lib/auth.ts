@@ -26,6 +26,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           id: user.id,
           email: user.email,
           name: user.name,
+          role: user.role,
           twoFactorEnabled: user.twoFactorEnabled,
         };
       },
@@ -37,6 +38,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     jwt({ token, user, trigger, session }) {
       if (user) {
         token.id = user.id!;
+        token.role = user.role ?? "employee";
         token.twoFactorEnabled = user.twoFactorEnabled ?? false;
         // On initial sign-in, 2FA is not yet verified
         token.twoFactorVerified = user.twoFactorEnabled ? false : true;
@@ -61,6 +63,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     session({ session, token }) {
       if (session.user && token.id) {
         session.user.id = token.id as string;
+        session.user.role = (token.role as string) ?? "employee";
         session.user.twoFactorEnabled = token.twoFactorEnabled ?? false;
         session.user.twoFactorVerified = token.twoFactorVerified ?? true;
       }

@@ -18,12 +18,23 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  const { attachments, ...ticketData } = parsed.data;
+
   const ticket = await prisma.ticket.create({
     data: {
-      ...parsed.data,
-      status: parsed.data.aiDraftResponse || parsed.data.aiDraftSubject ? "pending_review" : "new",
+      ...ticketData,
+      status:
+        ticketData.aiDraftResponse || ticketData.aiDraftSubject
+          ? "pending_review"
+          : "new",
+      ...(attachments && attachments.length > 0
+        ? { attachments: { create: attachments } }
+        : {}),
     },
   });
 
-  return NextResponse.json({ id: ticket.id, status: ticket.status }, { status: 201 });
+  return NextResponse.json(
+    { id: ticket.id, status: ticket.status },
+    { status: 201 }
+  );
 }

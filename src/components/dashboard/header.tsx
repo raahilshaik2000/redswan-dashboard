@@ -12,16 +12,26 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Bell, Search, Settings, LogOut, User, Inbox, Sun, Moon } from "lucide-react";
+import { Bell, Search, Settings, LogOut, Inbox, Sun, Moon } from "lucide-react";
 import { useTheme } from "next-themes";
 import { cn } from "@/lib/utils";
 import { TicketStatusBadge } from "@/components/tickets/ticket-status-badge";
-import type { TicketListItem } from "@/lib/types";
+import { CATEGORY_CONFIG } from "@/lib/category-config";
+import type { TicketListItem, TicketCategory } from "@/lib/types";
+
+const CATEGORY_BADGE_STYLES: Record<TicketCategory, string> = {
+  contact_us: "bg-cyan-500/15 text-cyan-400",
+  property_tokenization: "bg-orange-500/15 text-orange-400",
+  job_application: "bg-purple-500/15 text-purple-400",
+};
 
 const navLinks = [
-  { href: "/", label: "Dashboard" },
-  { href: "/tickets", label: "Tickets" },
-];
+  { href: "/", label: "Dashboard", roles: ["admin", "ceo"] },
+  { href: "/contact-us", label: "Contact Us" },
+  { href: "/property-tokenization", label: "Property Tokenization" },
+  { href: "/job-applicants", label: "Job Applicants" },
+  { href: "/admin", label: "Admin", roles: ["admin"] },
+] as const;
 
 export function Header() {
   const pathname = usePathname();
@@ -52,7 +62,14 @@ export function Header() {
     fetchNotifications();
   }, [fetchNotifications, pathname]);
 
+  function getBasePath() {
+    if (pathname.startsWith("/property-tokenization")) return "/property-tokenization";
+    if (pathname.startsWith("/job-applicants")) return "/job-applicants";
+    return "/contact-us";
+  }
+
   function pushSearch(value: string) {
+    const base = getBasePath();
     const params = new URLSearchParams(searchParams);
     if (value.trim()) {
       params.set("search", value.trim());
@@ -60,7 +77,7 @@ export function Header() {
       params.delete("search");
     }
     params.delete("page");
-    router.push(`/tickets${params.toString() ? `?${params}` : ""}`);
+    router.push(`${base}${params.toString() ? `?${params}` : ""}`);
   }
 
   function handleSearchChange(value: string) {
@@ -84,35 +101,33 @@ export function Header() {
     <header className="sticky top-0 z-50 flex h-16 items-center justify-between border-b border-border bg-background/80 px-6 backdrop-blur-sm">
       <div className="flex items-center gap-6">
         <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-            <span className="text-sm font-bold text-primary-foreground">
-              RS
-            </span>
-          </div>
-          <h1 className="text-lg font-semibold tracking-tight">RedSwan</h1>
+          <img src="/image-removebg-preview.png" alt="RedSwan" className="h-8 w-8 object-contain" />
+          <h1 className="text-lg font-semibold tracking-tight">RedSwan Digital Real Estate</h1>
         </div>
 
         <nav className="hidden items-center gap-1 sm:flex">
-          {navLinks.map((link) => {
-            const isActive =
-              link.href === "/"
-                ? pathname === "/"
-                : pathname.startsWith(link.href);
-            return (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={cn(
-                  "rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
-                  isActive
-                    ? "bg-muted text-foreground"
-                    : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                {link.label}
-              </Link>
-            );
-          })}
+          {navLinks
+            .filter((link) => !("roles" in link && link.roles) || (link.roles as readonly string[]).includes(session?.user?.role ?? ""))
+            .map((link) => {
+              const isActive =
+                link.href === "/"
+                  ? pathname === "/"
+                  : pathname.startsWith(link.href);
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={cn(
+                    "rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
+                    isActive
+                      ? "bg-muted text-foreground"
+                      : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
         </nav>
       </div>
 
@@ -148,28 +163,38 @@ export function Header() {
                 <p className="text-sm">No tickets yet</p>
               </div>
             ) : (
-              notifications.map((ticket) => (
-                <DropdownMenuItem
-                  key={ticket.id}
-                  className="flex flex-col items-start gap-1 px-3 py-2.5 cursor-pointer"
-                  onClick={() => router.push(`/tickets/${ticket.id}`)}
-                >
-                  <div className="flex w-full items-center justify-between">
-                    <span className="text-sm font-medium">
-                      {ticket.firstName} {ticket.lastName}
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                      {timeAgo(ticket.createdAt)}
-                    </span>
-                  </div>
-                  <div className="flex w-full items-center justify-between">
-                    <span className="text-xs text-muted-foreground truncate max-w-[180px]">
-                      {ticket.subject}
-                    </span>
-                    <TicketStatusBadge status={ticket.status} />
-                  </div>
-                </DropdownMenuItem>
-              ))
+              notifications.map((ticket) => {
+                const catConfig = CATEGORY_CONFIG[ticket.category];
+                return (
+                  <DropdownMenuItem
+                    key={ticket.id}
+                    className="flex flex-col items-start gap-1 px-3 py-2.5 cursor-pointer"
+                    onClick={() => router.push(`/${catConfig.slug}/${ticket.id}`)}
+                  >
+                    <div className="flex w-full items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium">
+                          {ticket.firstName} {ticket.lastName}
+                        </span>
+                        <span
+                          className={`shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-medium ${CATEGORY_BADGE_STYLES[ticket.category]}`}
+                        >
+                          {catConfig.label}
+                        </span>
+                      </div>
+                      <span className="text-xs text-muted-foreground ml-2">
+                        {timeAgo(ticket.createdAt)}
+                      </span>
+                    </div>
+                    <div className="flex w-full items-center justify-between">
+                      <span className="text-xs text-muted-foreground truncate max-w-[180px]">
+                        {ticket.subject}
+                      </span>
+                      <TicketStatusBadge status={ticket.status} />
+                    </div>
+                  </DropdownMenuItem>
+                );
+              })
             )}
             <DropdownMenuSeparator />
             <DropdownMenuItem className="justify-center text-sm text-muted-foreground cursor-pointer">
@@ -205,10 +230,6 @@ export function Header() {
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48">
-            <DropdownMenuItem onClick={() => router.push("/settings")}>
-              <User className="mr-2 h-4 w-4" />
-              Profile
-            </DropdownMenuItem>
             <DropdownMenuItem onClick={() => router.push("/settings")}>
               <Settings className="mr-2 h-4 w-4" />
               Settings

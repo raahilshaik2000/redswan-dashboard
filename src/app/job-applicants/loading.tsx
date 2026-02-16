@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { Header } from "@/components/dashboard/header";
 
-export default function TicketsLoading() {
+export default function JobApplicantsLoading() {
   return (
     <div className="min-h-screen bg-background">
       <Suspense fallback={null}>
@@ -9,7 +9,7 @@ export default function TicketsLoading() {
       </Suspense>
       <main className="mx-auto max-w-7xl px-6 py-6">
         <div className="mb-6">
-          <div className="h-8 w-32 animate-pulse rounded bg-muted" />
+          <div className="h-8 w-40 animate-pulse rounded bg-muted" />
           <div className="mt-2 h-4 w-64 animate-pulse rounded bg-muted" />
         </div>
 

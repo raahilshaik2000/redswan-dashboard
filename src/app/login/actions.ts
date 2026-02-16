@@ -14,7 +14,7 @@ export async function loginAction(formData: FormData) {
     // Check if user has 2FA before signing in
     const user = await prisma.user.findUnique({
       where: { email },
-      select: { id: true, twoFactorEnabled: true },
+      select: { id: true, role: true, twoFactorEnabled: true },
     });
 
     await signIn("credentials", {
@@ -30,7 +30,7 @@ export async function loginAction(formData: FormData) {
       return { twoFactorRequired: true };
     }
 
-    return { redirect: "/tickets" };
+    return { redirect: user?.role === "admin" || user?.role === "ceo" ? "/" : "/contact-us" };
   } catch (error) {
     if (error instanceof AuthError) {
       return { error: "Invalid email or password" };

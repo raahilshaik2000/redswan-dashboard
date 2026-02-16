@@ -9,10 +9,15 @@ function getResend() {
 }
 
 export async function sendTwoFactorCode(email: string, code: string) {
+  if (!process.env.RESEND_API_KEY) {
+    console.log(`[2FA] Code for ${email}: ${code}`);
+    return;
+  }
+
   await getResend().emails.send({
-    from: "RedSwan <onboarding@resend.dev>",
+    from: "RedSwan Digital Real Estate <onboarding@resend.dev>",
     to: email,
-    subject: "Your RedSwan verification code",
+    subject: "Your RedSwan Digital Real Estate verification code",
     html: `
       <div style="font-family: sans-serif; max-width: 400px; margin: 0 auto; padding: 24px;">
         <h2 style="margin: 0 0 8px;">Verification Code</h2>

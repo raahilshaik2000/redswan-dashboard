@@ -7,6 +7,12 @@ datasource db {
   provider = "postgresql"
 }
 
+enum UserRole {
+  admin
+  ceo
+  employee
+}
+
 enum TicketStatus {
   new
   pending_review
@@ -15,11 +21,18 @@ enum TicketStatus {
   archived
 }
 
+enum TicketCategory {
+  contact_us
+  property_tokenization
+  job_application
+}
+
 model User {
   id                String            @id @default(cuid())
   email             String            @unique
   hashedPassword    String
   name              String            @default("")
+  role              UserRole          @default(employee)
   twoFactorEnabled  Boolean           @default(false)
   createdAt         DateTime          @default(now())
   updatedAt         DateTime          @default(now()) @updatedAt
@@ -40,26 +53,48 @@ model TwoFactorToken {
 }
 
 model Ticket {
-  id               String       @id @default(cuid())
+  id               String         @id @default(cuid())
+  category         TicketCategory @default(contact_us)
   firstName        String
   lastName         String
   email            String
-  location         String       @default("")
-  subject          String
-  message          String
-  aiDraftSubject   String       @default("")
-  aiDraftResponse  String       @default("")
-  finalSubject     String       @default("")
-  finalResponse    String       @default("")
-  status           TicketStatus @default(new)
-  n8nExecutionId   String       @default("")
+  location         String         @default("")
+  subject          String         @default("")
+  message          String         @default("")
+  phoneNumber      String?
+  propertyName     String?
+  propertyAddress  String?
+  country          String?
+  linkedinUrl      String?
+  position         String?
+  aiDraftSubject   String         @default("")
+  aiDraftResponse  String         @default("")
+  finalSubject     String         @default("")
+  finalResponse    String         @default("")
+  status           TicketStatus   @default(new)
+  n8nExecutionId   String         @default("")
   respondedAt      DateTime?
-  createdAt        DateTime     @default(now())
-  updatedAt        DateTime     @updatedAt
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
   notes            Note[]
+  attachments      Attachment[]
 
   @@index([status])
+  @@index([category])
   @@index([createdAt])
+}
+
+model Attachment {
+  id        String   @id @default(cuid())
+  fileName  String
+  fileType  String
+  fileUrl   String
+  fileSize  Int?
+  ticketId  String
+  ticket    Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@index([ticketId])
 }
 
 model Note {

@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { toast } from "sonner";
 import { TicketsHeader } from "./tickets-header";
 import { TicketsTable } from "./tickets-table";
-import type { TicketStats, TicketListItem } from "@/lib/types";
+import type { TicketStats, TicketListItem, TicketCategory } from "@/lib/types";
 
 interface TicketsLiveWrapperProps {
   initialStats: TicketStats;
@@ -17,6 +17,7 @@ interface TicketsLiveWrapperProps {
   };
   currentStatus?: string;
   currentSearch?: string;
+  category?: TicketCategory;
 }
 
 export function TicketsLiveWrapper({
@@ -25,6 +26,7 @@ export function TicketsLiveWrapper({
   initialPagination,
   currentStatus,
   currentSearch,
+  category,
 }: TicketsLiveWrapperProps) {
   const [stats, setStats] = useState(initialStats);
   const [tickets, setTickets] = useState(initialTickets);
@@ -36,12 +38,16 @@ export function TicketsLiveWrapper({
       const params = new URLSearchParams();
       if (currentStatus && currentStatus !== "all") params.set("status", currentStatus);
       if (currentSearch) params.set("search", currentSearch);
+      if (category) params.set("category", category);
       params.set("page", String(initialPagination.page));
       params.set("limit", String(initialPagination.limit));
 
+      const statsParams = new URLSearchParams();
+      if (category) statsParams.set("category", category);
+
       const [ticketRes, statsRes] = await Promise.all([
         fetch(`/api/tickets?${params}`),
-        fetch("/api/tickets/stats"),
+        fetch(`/api/tickets/stats?${statsParams}`),
       ]);
 
       if (ticketRes.ok) {
@@ -62,10 +68,10 @@ export function TicketsLiveWrapper({
     } catch {
       // silent fail on poll
     }
-  }, [currentStatus, currentSearch, initialPagination.page, initialPagination.limit]);
+  }, [currentStatus, currentSearch, category, initialPagination.page, initialPagination.limit]);
 
   useEffect(() => {
-    const interval = setInterval(fetchLatest, 30_000);
+    const interval = setInterval(fetchLatest, 10_000);
     return () => clearInterval(interval);
   }, [fetchLatest]);
 
@@ -84,6 +90,7 @@ export function TicketsLiveWrapper({
         tickets={tickets}
         pagination={pagination}
         currentStatus={currentStatus}
+        category={category}
       />
     </div>
   );

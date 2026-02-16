@@ -25,6 +25,21 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(verifyUrl);
   }
 
+  // Role-based route protection
+  const role = token.role as string;
+
+  if (pathname.startsWith("/admin") || pathname.startsWith("/api/admin")) {
+    if (role !== "admin") {
+      return NextResponse.redirect(new URL("/contact-us", req.url));
+    }
+  }
+
+  if (pathname === "/") {
+    if (role !== "admin" && role !== "ceo") {
+      return NextResponse.redirect(new URL("/contact-us", req.url));
+    }
+  }
+
   return NextResponse.next();
 }
 

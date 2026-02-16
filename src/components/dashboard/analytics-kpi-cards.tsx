@@ -39,19 +39,19 @@ export function AnalyticsKPICards({
       title: "New (30d)",
       value: newTickets,
       icon: Sparkles,
-      color: "text-blue-500",
+      color: "text-cyan-400",
     },
     {
       title: "Avg Response Time",
       value: formatDuration(avgResponseTimeSeconds),
       icon: Clock,
-      color: "text-amber-500",
+      color: "text-yellow-400",
     },
     {
       title: "Sent",
       value: sentTickets,
       icon: Send,
-      color: "text-purple-500",
+      color: "text-purple-400",
     },
   ];
 

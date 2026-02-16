@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import { Header } from "@/components/dashboard/header";
 
-export default function TicketDetailLoading() {
+export default function JobApplicantsDetailLoading() {
   return (
     <div className="min-h-screen bg-background">
       <Suspense fallback={null}>
