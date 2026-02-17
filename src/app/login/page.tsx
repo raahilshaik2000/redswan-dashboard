@@ -25,9 +25,8 @@ export default function LoginPage() {
       setError(result.error);
     } else if (result?.twoFactorRequired) {
       router.push("/login/verify");
-    } else if (result?.redirect) {
-      window.location.href = result.redirect;
     }
+    // Server-side redirect will handle successful login without 2FA
   }
 
   return (
