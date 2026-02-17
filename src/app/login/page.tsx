@@ -37,7 +37,8 @@ export default function LoginPage() {
         router.push("/login/verify");
       } else if (result?.success && result?.redirect) {
         console.log("Success! Redirecting to:", result.redirect); // DEBUG
-        router.push(result.redirect);
+        // Use window.location for full page reload to ensure session is loaded
+        window.location.href = result.redirect;
       } else {
         console.log("Unexpected result:", result); // DEBUG
       }
