@@ -13,20 +13,34 @@ export default function LoginPage() {
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    console.log("Login form submitted"); // DEBUG
     setError("");
     setLoading(true);
 
-    const formData = new FormData(e.currentTarget);
-    const result = await loginAction(formData);
+    try {
+      const formData = new FormData(e.currentTarget);
+      console.log("Calling loginAction..."); // DEBUG
+      const result = await loginAction(formData);
+      console.log("Login result:", result); // DEBUG
 
-    setLoading(false);
+      setLoading(false);
 
-    if (result?.error) {
-      setError(result.error);
-    } else if (result?.twoFactorRequired) {
-      router.push("/login/verify");
-    } else if (result?.success && result?.redirect) {
-      router.push(result.redirect);
+      if (result?.error) {
+        console.log("Error:", result.error); // DEBUG
+        setError(result.error);
+      } else if (result?.twoFactorRequired) {
+        console.log("2FA required, redirecting..."); // DEBUG
+        router.push("/login/verify");
+      } else if (result?.success && result?.redirect) {
+        console.log("Success! Redirecting to:", result.redirect); // DEBUG
+        router.push(result.redirect);
+      } else {
+        console.log("Unexpected result:", result); // DEBUG
+      }
+    } catch (err) {
+      console.error("Login error:", err); // DEBUG
+      setLoading(false);
+      setError("An error occurred. Check console for details.");
     }
   }
 
