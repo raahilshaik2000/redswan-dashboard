@@ -17,25 +17,29 @@ export default function LoginPage() {
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    console.log("Login form submitted"); // DEBUG
+    console.log("Login form submitted");
     setError("");
     setLoading(true);
 
-    const formData = new FormData(e.currentTarget);
-    console.log("Calling loginAction..."); // DEBUG
-    const result = await loginAction(formData);
-    console.log("Login result:", result); // DEBUG
+    try {
+      const formData = new FormData(e.currentTarget);
+      console.log("Calling loginAction...");
+      const result = await loginAction(formData);
+      console.log("Login result:", result);
 
-    setLoading(false);
-
-    if (result?.error) {
-      console.log("Error:", result.error); // DEBUG
-      setError(result.error);
-    } else if (result?.twoFactorRequired) {
-      console.log("2FA required, redirecting..."); // DEBUG
-      router.push("/login/verify");
+      if (result?.error) {
+        console.log("Error:", result.error);
+        setError(result.error);
+        setLoading(false);
+      } else if (result?.twoFactorRequired) {
+        console.log("2FA required, redirecting...");
+        router.push("/login/verify");
+      }
+      // If no error and no 2FA, the server action will redirect automatically via NextAuth
+    } catch (error) {
+      // If NextAuth throws during redirect, that's expected - let it complete
+      console.log("Redirect in progress...");
     }
-    // If no error and no 2FA, the server action will redirect automatically
   }
 
   return (

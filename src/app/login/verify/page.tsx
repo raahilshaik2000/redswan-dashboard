@@ -75,8 +75,13 @@ export default function VerifyPage() {
         return;
       }
 
-      await update({ twoFactorVerified: true });
-      router.push("/contact-us");
+      // Update session with verified status
+      const updatedSession = await update({ twoFactorVerified: true });
+
+      // Redirect based on user role
+      const userRole = updatedSession?.user?.role;
+      const redirectUrl = (userRole === "admin" || userRole === "ceo") ? "/" : "/contact-us";
+      router.push(redirectUrl);
     } catch {
       setError("Something went wrong");
       setLoading(false);
