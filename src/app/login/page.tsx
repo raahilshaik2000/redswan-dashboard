@@ -6,10 +6,14 @@ import { Eye, EyeOff, ArrowRight } from "lucide-react";
 import { loginAction } from "./actions";
 
 export default function LoginPage() {
+  console.log("🚀 LoginPage component loaded!"); // DEBUG - should appear on page load
+
   const router = useRouter();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+  console.log("🔧 State initialized, router:", router ? "✓" : "✗"); // DEBUG
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -128,6 +132,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
+            onClick={() => console.log("🖱️ Button clicked directly!")} // DEBUG - direct click handler
             className="flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-red-600 text-sm font-medium text-white transition-all hover:bg-red-500 disabled:opacity-50 shadow-lg shadow-red-500/20 hover:shadow-red-500/30"
           >
             {loading ? (
