@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { createTwoFactorToken } from "@/lib/two-factor";
 import { sendTwoFactorCode } from "@/lib/email";
 import { AuthError } from "next-auth";
+import { redirect } from "next/navigation";
 
 export async function loginAction(formData: FormData) {
   const email = formData.get("email") as string;
@@ -21,32 +22,28 @@ export async function loginAction(formData: FormData) {
       return { error: "Invalid email or password" };
     }
 
-    // If 2FA enabled, send code and signal client to redirect
+    // Sign in with redirect: false to check credentials
+    const result = await signIn("credentials", {
+      email,
+      password,
+      redirect: false,
+    });
+
+    // If signIn failed, it would have thrown an error
+    // If we get here, login was successful
+
+    // If 2FA enabled, send code
     if (user.twoFactorEnabled) {
-      // Verify credentials first
-      await signIn("credentials", {
-        email,
-        password,
-        redirect: false,
-      });
       const code = await createTwoFactorToken(user.id);
       await sendTwoFactorCode(email, code);
       return { twoFactorRequired: true };
     }
 
-    // For non-2FA users, let NextAuth handle the redirect
+    // For non-2FA users, redirect based on role
     const redirectUrl = user.role === "admin" || user.role === "ceo" ? "/" : "/contact-us";
-    await signIn("credentials", {
-      email,
-      password,
-      redirectTo: redirectUrl,
-    });
-
-    // This line won't be reached if signIn succeeds (it redirects)
-    return { success: true, redirect: redirectUrl };
+    redirect(redirectUrl);
   } catch (error) {
-    // If it's a redirect error (from successful signIn), re-throw it
-    // Redirect errors have a specific digest property
+    // If it's a redirect error, re-throw it (let it complete the redirect)
     if (error && typeof error === "object" && "digest" in error &&
         typeof error.digest === "string" && error.digest.startsWith("NEXT_REDIRECT")) {
       throw error;
@@ -55,6 +52,7 @@ export async function loginAction(formData: FormData) {
     if (error instanceof AuthError) {
       return { error: "Invalid email or password" };
     }
+    console.error("Login error:", error);
     return { error: "An unexpected error occurred" };
   }
 }
