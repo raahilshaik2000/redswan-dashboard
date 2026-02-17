@@ -21,24 +21,22 @@ export default function LoginPage() {
     setError("");
     setLoading(true);
 
-    try {
-      const formData = new FormData(e.currentTarget);
-      console.log("Calling loginAction...");
-      const result = await loginAction(formData);
-      console.log("Login result:", result);
+    const formData = new FormData(e.currentTarget);
+    console.log("Calling loginAction...");
+    const result = await loginAction(formData);
+    console.log("Login result:", result);
 
-      if (result?.error) {
-        console.log("Error:", result.error);
-        setError(result.error);
-        setLoading(false);
-      } else if (result?.twoFactorRequired) {
-        console.log("2FA required, redirecting...");
-        router.push("/login/verify");
-      }
-      // If no error and no 2FA, the server action will redirect automatically via NextAuth
-    } catch (error) {
-      // If NextAuth throws during redirect, that's expected - let it complete
-      console.log("Redirect in progress...");
+    if (result?.error) {
+      console.log("Error:", result.error);
+      setError(result.error);
+      setLoading(false);
+    } else if (result?.twoFactorRequired) {
+      console.log("2FA required, redirecting...");
+      router.push("/login/verify");
+    } else if (result?.success && result?.redirectUrl) {
+      console.log("Login successful, redirecting to:", result.redirectUrl);
+      // Use window.location for full page reload to ensure session is loaded
+      window.location.href = result.redirectUrl;
     }
   }
 

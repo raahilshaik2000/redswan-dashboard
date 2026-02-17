@@ -40,18 +40,21 @@ export async function loginAction(formData: FormData) {
       return { twoFactorRequired: true };
     }
 
-    // For non-2FA users, let NextAuth handle the full sign-in and redirect
-    const redirectUrl = user.role === "admin" || user.role === "ceo" ? "/" : "/contact-us";
+    // For non-2FA users, sign in and return success with redirect URL
     await signIn("credentials", {
       email,
       password,
-      redirectTo: redirectUrl,
+      redirect: false,
     });
+
+    // Return success with the redirect URL for client-side navigation
+    const redirectUrl = user.role === "admin" || user.role === "ceo" ? "/" : "/contact-us";
+    return { success: true, redirectUrl };
   } catch (error) {
     if (error instanceof AuthError) {
       return { error: "Invalid email or password" };
     }
     console.error("Login error:", error);
-    throw error; // Re-throw to allow NextAuth redirects to complete
+    return { error: "An unexpected error occurred" };
   }
 }
