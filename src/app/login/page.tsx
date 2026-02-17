@@ -21,27 +21,21 @@ export default function LoginPage() {
     setError("");
     setLoading(true);
 
-    try {
-      const formData = new FormData(e.currentTarget);
-      console.log("Calling loginAction..."); // DEBUG
-      const result = await loginAction(formData);
-      console.log("Login result:", result); // DEBUG
+    const formData = new FormData(e.currentTarget);
+    console.log("Calling loginAction..."); // DEBUG
+    const result = await loginAction(formData);
+    console.log("Login result:", result); // DEBUG
 
-      setLoading(false);
+    setLoading(false);
 
-      if (result?.error) {
-        console.log("Error:", result.error); // DEBUG
-        setError(result.error);
-      } else if (result?.twoFactorRequired) {
-        console.log("2FA required, redirecting..."); // DEBUG
-        router.push("/login/verify");
-      }
-      // If no error and no 2FA, the server action will redirect automatically
-    } catch (err) {
-      console.error("Login error:", err); // DEBUG
-      setLoading(false);
-      setError("An error occurred. Check console for details.");
+    if (result?.error) {
+      console.log("Error:", result.error); // DEBUG
+      setError(result.error);
+    } else if (result?.twoFactorRequired) {
+      console.log("2FA required, redirecting..."); // DEBUG
+      router.push("/login/verify");
     }
+    // If no error and no 2FA, the server action will redirect automatically
   }
 
   return (
