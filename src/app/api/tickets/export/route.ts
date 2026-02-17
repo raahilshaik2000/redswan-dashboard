@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { TicketStatus, TicketCategory } from "@/generated/prisma/enums";
+import { TicketStatus, TicketCategory } from "@/generated/prisma";
 import { generateCSV } from "@/lib/csv";
 import { CATEGORY_CONFIG } from "@/lib/category-config";
 import type { TicketCategory as TC } from "@/lib/types";

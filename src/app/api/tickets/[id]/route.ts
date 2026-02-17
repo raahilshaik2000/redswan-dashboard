@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { updateTicketSchema } from "@/lib/validations";
-import { TicketStatus } from "@/generated/prisma/enums";
+import { TicketStatus } from "@/generated/prisma";
 
 export async function GET(
   _request: NextRequest,

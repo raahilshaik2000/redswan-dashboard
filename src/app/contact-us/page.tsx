@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import { Header } from "@/components/dashboard/header";
 import { TicketsLiveWrapper } from "@/components/tickets/tickets-live-wrapper";
 import { prisma } from "@/lib/prisma";
-import { TicketStatus as PrismaTicketStatus } from "@/generated/prisma/enums";
+import { TicketStatus as PrismaTicketStatus } from "@/generated/prisma";
 import { CATEGORY_CONFIG } from "@/lib/category-config";
 import type { TicketStats, TicketListItem } from "@/lib/types";
 
