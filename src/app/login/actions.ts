@@ -5,7 +5,6 @@ import { prisma } from "@/lib/prisma";
 import { createTwoFactorToken } from "@/lib/two-factor";
 import { sendTwoFactorCode } from "@/lib/email";
 import { AuthError } from "next-auth";
-import { redirect } from "next/navigation";
 
 export async function loginAction(formData: FormData) {
   const email = formData.get("email") as string;
@@ -31,13 +30,13 @@ export async function loginAction(formData: FormData) {
       return { twoFactorRequired: true };
     }
 
-    // Redirect based on role
+    // Return success with redirect path
     const redirectUrl = user?.role === "admin" || user?.role === "ceo" ? "/" : "/contact-us";
-    redirect(redirectUrl);
+    return { success: true, redirect: redirectUrl };
   } catch (error) {
     if (error instanceof AuthError) {
       return { error: "Invalid email or password" };
     }
-    throw error;
+    return { error: "An unexpected error occurred" };
   }
 }
