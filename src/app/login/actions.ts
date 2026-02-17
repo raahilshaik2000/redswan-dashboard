@@ -45,6 +45,13 @@ export async function loginAction(formData: FormData) {
     // This line won't be reached if signIn succeeds (it redirects)
     return { success: true, redirect: redirectUrl };
   } catch (error) {
+    // If it's a redirect error (from successful signIn), re-throw it
+    // Redirect errors have a specific digest property
+    if (error && typeof error === "object" && "digest" in error &&
+        typeof error.digest === "string" && error.digest.startsWith("NEXT_REDIRECT")) {
+      throw error;
+    }
+
     if (error instanceof AuthError) {
       return { error: "Invalid email or password" };
     }
