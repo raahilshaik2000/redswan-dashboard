@@ -17,21 +17,32 @@ export async function loginAction(formData: FormData) {
       select: { id: true, role: true, twoFactorEnabled: true },
     });
 
-    await signIn("credentials", {
-      email,
-      password,
-      redirect: false,
-    });
+    if (!user) {
+      return { error: "Invalid email or password" };
+    }
 
     // If 2FA enabled, send code and signal client to redirect
-    if (user?.twoFactorEnabled) {
+    if (user.twoFactorEnabled) {
+      // Verify credentials first
+      await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+      });
       const code = await createTwoFactorToken(user.id);
       await sendTwoFactorCode(email, code);
       return { twoFactorRequired: true };
     }
 
-    // Return success with redirect path
-    const redirectUrl = user?.role === "admin" || user?.role === "ceo" ? "/" : "/contact-us";
+    // For non-2FA users, let NextAuth handle the redirect
+    const redirectUrl = user.role === "admin" || user.role === "ceo" ? "/" : "/contact-us";
+    await signIn("credentials", {
+      email,
+      password,
+      redirectTo: redirectUrl,
+    });
+
+    // This line won't be reached if signIn succeeds (it redirects)
     return { success: true, redirect: redirectUrl };
   } catch (error) {
     if (error instanceof AuthError) {
