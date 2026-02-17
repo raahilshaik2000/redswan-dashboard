@@ -35,13 +35,8 @@ export default function LoginPage() {
       } else if (result?.twoFactorRequired) {
         console.log("2FA required, redirecting..."); // DEBUG
         router.push("/login/verify");
-      } else if (result?.success && result?.redirect) {
-        console.log("Success! Redirecting to:", result.redirect); // DEBUG
-        // Use window.location for full page reload to ensure session is loaded
-        window.location.href = result.redirect;
-      } else {
-        console.log("Unexpected result:", result); // DEBUG
       }
+      // If no error and no 2FA, the server action will redirect automatically
     } catch (err) {
       console.error("Login error:", err); // DEBUG
       setLoading(false);
