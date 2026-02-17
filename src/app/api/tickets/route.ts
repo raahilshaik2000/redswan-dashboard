@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { ticketQuerySchema } from "@/lib/validations";
-import { TicketStatus, TicketCategory } from "@/generated/prisma";
+import { TicketStatus, TicketCategory } from "@/generated/prisma/client";
 
 export async function GET(request: NextRequest) {
   const params = Object.fromEntries(request.nextUrl.searchParams);
